@@ -1,0 +1,15 @@
+#!/bin/csh -f
+
+echo " "
+echo "**** Compiling bufr stuff ****"
+echo " "
+
+( cd src ; make -i -r all )
+if ( -e src/ascii2bufr_conv.exe ) then
+    ln -sf src/ascii2bufr_conv.exe .
+endif
+
+if ( -e src/nc2bufr_ref.exe ) then
+    ln -sf src/nc2bufr_ref.exe .
+endif
+
