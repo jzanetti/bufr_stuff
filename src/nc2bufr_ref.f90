@@ -1,0 +1,61 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! convert radar netcdf file into the required format by GSI
+!
+! Input data:
+!     -- Using the gridded (3d) reflectivity data produced from python
+!        Example code: /home/jzanetti/workspace/radar_bufr/write_radar_nc.py
+!     -- Note that in python codes, 3d data is in (lat, lon, level), while in fortran, you have to read in inversely (e.g., (level, lon, lat))
+! Compile method:
+!     -- gfortran -o nc2bufr_ref.exe -I/home/jzanetti/programs/netcdf-fortran-4.4.4/include -L/home/jzanetti/programs/netcdf-fortran-4.4.4/lib -lnetcdf -lnetcdff read_ref_nc.f90
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+program nc2bufr_ref
+  use netcdf
+  implicit none
+
+  integer :: ncid, varid
+  integer :: x, y, x_dimid, y_dimid, i, j, k
+
+  character (len = *), parameter :: filename = "/home/jzanetti/workspace/radar_bufr/test.nc"
+  character (len = *), parameter :: var_name = "reflectivity"
+  integer, parameter :: nz = 31, nlon = 144, nlat = 73
+  real :: data_in(nz, nlon, nlat)
+  real :: data_out(nz+2, nlon*nlat)
+
+  integer :: n, idate
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Create the netCDF file
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  call check( nf90_open(filename, nf90_nowrite, ncid) )
+  call check( nf90_inq_varid(ncid, var_name, varid) )
+  call check( nf90_get_var(ncid, varid, data_in) )
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! write the output into GSI
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  n=1
+  do i=1,nlon
+    do j=1,nlat
+      data_out(1,n)=i
+      data_out(2,n)=j
+      do k=1,nz
+        data_out(k+2,n)=data_in(k,i,j)
+      enddo
+      n=n+1
+    enddo
+  enddo
+     
+  call write_bufr_ref(nz,nlon,nlat,n-1,data_out,2008120100)
+
+contains
+  subroutine check(status)
+    integer, intent ( in) :: status
+    
+    if(status /= nf90_noerr) then 
+      print *, trim(nf90_strerror(status))
+      stop "Stopped"
+    end if
+  end subroutine check  
+
+end program nc2bufr_ref
