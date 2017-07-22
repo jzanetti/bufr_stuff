@@ -112,7 +112,7 @@ program ascii2bufr_conv
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Start the file: open bufr file and messagee
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- open(unit_table,file='conv_prep.bufrtable', action='read')
+ open(unit_table,file='etc/conv_prep.bufrtable', action='read')
  open(unit_out,file=file_out,action='write',form='unformatted')
  call datelen(10)
  call openbf(unit_out,'OUT',unit_table)

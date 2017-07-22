@@ -1,4 +1,4 @@
 #!/bin/csh -f
 
-(/bin/rm -rf *.exe)
+(/bin/rm -rf bin)
 (cd src ; /bin/rm -f *.o *.exe)

@@ -16,18 +16,35 @@ program nc2bufr_ref
   integer :: ncid, varid
   integer :: x, y, x_dimid, y_dimid, i, j, k
 
-  character (len = *), parameter :: filename = "/home/jzanetti/workspace/radar_bufr/test.nc"
+!  character (len = *), parameter :: filename = "/home/jzanetti/workspace/radar_bufr/test.nc"
   character (len = *), parameter :: var_name = "reflectivity"
   integer, parameter :: nz = 31, nlon = 144, nlat = 73
   real :: data_in(nz, nlon, nlat)
   real :: data_out(nz+2, nlon*nlat)
 
-  integer :: n, idate
+  integer :: n, i_date
+  character(80) :: file_in, file_out,radar_anal_time
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Reading argument
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ n = iargc()
+ if (n < 3) then
+   write(*,'(a)') "usage: ./*.exe YYYYMMDDHH input output"
+   write(*,'(a)') "   --radar data analysis time:  YYYYMMDDHH"
+   write(*,'(a)') "   --input:  obs in netcdf, e.g., test/radar_ref.nc"
+   write(*,'(a)') "   --output: obs in prebufr, e.g., NSSLRefInGSI.bufr"
+   stop
+ else
+   call getarg(1, radar_anal_time)
+   call getarg(2, file_in)
+   call getarg(3, file_out)
+ endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Create the netCDF file
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  call check( nf90_open(filename, nf90_nowrite, ncid) )
+  call check( nf90_open(file_in, nf90_nowrite, ncid) )
   call check( nf90_inq_varid(ncid, var_name, varid) )
   call check( nf90_get_var(ncid, varid, data_in) )
 
@@ -45,8 +62,9 @@ program nc2bufr_ref
       n=n+1
     enddo
   enddo
-     
-  call write_bufr_ref(nz,nlon,nlat,n-1,data_out,2008120100)
+  
+  read(radar_anal_time,'(I10)') i_date
+  call write_bufr_ref(nz,nlon,nlat,n-1,data_out,file_out,i_date)
 
 contains
   subroutine check(status)

@@ -1,4 +1,4 @@
-  subroutine write_bufr_ref(maxlvl,nlon,nlat,numref,ref3d_column,idate)
+  subroutine write_bufr_ref(maxlvl,nlon,nlat,numref,ref3d_column,file_out,idate)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    write_bufr_nsslref
@@ -37,6 +37,7 @@
     INTEGER(i_kind)  ::  numlvl,numref
     INTEGER(i_kind)  ::  i,n,k,iret
 
+    character(80) :: file_out
 
 !mhu    idate=2008120100
     subset='ADPUPA'
@@ -58,8 +59,8 @@
     ENDDO
     ENDDO
 
-    open(ludx,file='radar_prep.bufrtable',action='read')
-    open(lendian_in,file='NSSLRefInGSI.bufr',action='write',form='unformatted')
+    open(ludx,file='etc/radar_prep.bufrtable',action='read')
+    open(lendian_in,file=file_out,action='write',form='unformatted')
 
     call datelen(10)
     call openbf(lendian_in,'OUT',ludx)
