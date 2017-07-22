@@ -11,16 +11,15 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program nc2bufr_ref
   use netcdf
+  use kinds, only: r_kind,i_kind
   implicit none
 
   integer :: ncid, varid
   integer :: x, y, x_dimid, y_dimid, i, j, k
-
-!  character (len = *), parameter :: filename = "/home/jzanetti/workspace/radar_bufr/test.nc"
   character (len = *), parameter :: var_name = "reflectivity"
-  integer, parameter :: nz = 31, nlon = 144, nlat = 73
+  integer, parameter :: nz = 31, nlon = 25, nlat = 30
   real :: data_in(nz, nlon, nlat)
-  real :: data_out(nz+2, nlon*nlat)
+  REAL(r_kind) :: data_out(nz+2, nlon*nlat)
 
   integer :: n, i_date
   character(80) :: file_in, file_out,radar_anal_time
@@ -56,8 +55,13 @@ program nc2bufr_ref
     do j=1,nlat
       data_out(1,n)=i
       data_out(2,n)=j
+      write(*,*) data_out(1,n)
+      !endif
       do k=1,nz
         data_out(k+2,n)=data_in(k,i,j)
+        !write(*,*) data_in(k,i,j)
+        !write(*,*) k
+        !write(*,*) n
       enddo
       n=n+1
     enddo

@@ -51,6 +51,7 @@
 !
     DO i=1,numref
     DO k=1,maxlvl
+      !write(*,*) ref3d_column(12,i)
       if(ref3d_column(k+2,i) < -63.0 .and. ref3d_column(k+2,i) > -100.0 ) then
         ref3d_column(k+2,i)=-63.0_r_kind
       elseif(ref3d_column(k+2,i) < -100.0) then
