@@ -1,4 +1,4 @@
 #!/bin/csh -f
 
-(/bin/rm -rf bin)
+(/bin/rm -rf bin *.bufr)
 (cd src ; /bin/rm -f *.o *.exe)
