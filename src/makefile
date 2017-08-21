@@ -2,10 +2,13 @@
 #!/bin/sh -v
 # write_bufr_ref.o
 
-FC = gfortran 
+FC		=	gfortran 
+NETCDF_C	=	/home/jzanetti/programs/netcdf-C-4.4.1.1
+NETCDF_FORTRAN	=	/home/jzanetti/programs/netcdf-fortran-4.4.4
+GSI		=	/home/jzanetti/programs/comGSIv3.5_EnKFv1.1
 
-INC	=	-I/home/jzanetti/programs/netcdf-fortran-4.4.4/include -I/home/jzanetti/programs/netcdf-C-4.4.4/include -I/home/jzanetti/programs/comGSIv3.5_EnKFv1.1/include
-LIBS	=  	-L/home/jzanetti/programs/netcdf-fortran-4.4.4/lib -lnetcdf -lnetcdff -L/home/jzanetti/programs/comGSIv3.5_EnKFv1.1/lib -lbufr
+INC	=	-I$(NETCDF_FORTRAN)/include -I$(NETCDF_C)/include -I$(GSI)/include
+LIBS	=  	-L$(NETCDF_FORTRAN)/lib -L$(NETCDF_C)/lib -lnetcdf -lnetcdff -L$(GSI)/lib -lbufr
 
 OBJS_nc2bufr_ref	=	nc2bufr_ref.o write_bufr_ref.o
 OBJS_ascii2bufr_conv	=	ascii2bufr_conv.o
@@ -22,6 +25,8 @@ ascii2bufr_conv: 	$(OBJS_ascii2bufr_conv)
 
 .f90.o :
 	$(FC) $(FLAGS) $(INC) -c $<
+
+%.o : %.mod
 
 clean:
 	/bin/rm -f *.o *.exe

@@ -55,18 +55,18 @@ program nc2bufr_ref
     do j=1,nlat
       data_out(1,n)=i
       data_out(2,n)=j
-      write(*,*) data_out(1,n)
+      !write(*,*) data_out(1,n)
       !endif
       do k=1,nz
         data_out(k+2,n)=data_in(k,i,j)
-        !write(*,*) data_in(k,i,j)
-        !write(*,*) k
-        !write(*,*) n
+        if(data_out(k+2,n) > 0.0) then
+           write(*,*) 'k, i, j, value', k, i, j, data_in(k,i,j)
+        endif
       enddo
       n=n+1
     enddo
   enddo
-  
+
   read(radar_anal_time,'(I10)') i_date
   call write_bufr_ref(nz,nlon,nlat,n-1,data_out,file_out,i_date)
 

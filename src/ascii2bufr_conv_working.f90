@@ -1,11 +1,10 @@
 ! **********************************************************************************************
 !  example of writing conventional values into a bufr file
 !  Details:
-!       * an example for writing adpupa: GSI bufr document p36
-!       * prebufr observation type: http://www.emc.ncep.noaa.gov/mmb/data_processing/prepbufr.doc/table_2.htm
-!       * cat type: ftp://ftp.cpc.ncep.noaa.gov/wd51we/rr_tmp/sample_obs_dump/docs/LevelCat_code.txt
-!       * cloud amount table: src/libs/gsdcloud/read_Surface.f90
-!       * others: http://www.emc.ncep.noaa.gov/mmb/data_processing/prepbufr.doc/table_1.htm
+!       an example for writing adpupa: GSI bufr document p36
+!       prebufr observation type: http://www.emc.ncep.noaa.gov/mmb/data_processing/prepbufr.doc/table_2.htm
+!       cat type: ftp://ftp.cpc.ncep.noaa.gov/wd51we/rr_tmp/sample_obs_dump/docs/LevelCat_code.txt
+!       others: http://www.emc.ncep.noaa.gov/mmb/data_processing/prepbufr.doc/table_1.htm
 !               http://www.dtcenter.org/com-GSI/users/docs/presentations/2015_tutorial/20150812_L09_Hu_BE_hybrid_obsE.pdf
 !
 !  Supported observation types:
@@ -23,8 +22,6 @@
 !        -- SFCSHP(280): Ship/Buoy with reported station pressure
 !        -- ADPSFC(281): Synop/Metar with reported station pressure
 !        -- ADPSFC/SFCSHP(284): Ship/Buoy/Synop/Metar without reported station pressure
-!     -- CLOUD (test):
-!        -- METAR cloud report (surface)
 !
 !
 !  Variables:
@@ -48,9 +45,6 @@
 !       PWO: total precipitation water observation (in kg/m2, or mm, scale=1, ref=0)
 !       CAT: prebufr data level category (code table, scale=0, ref=0)
 !       PRSS: surface pressure observation (in Pascals, scale=-1, ref=0)
-!    -- metarcldstr:
-!       CLAM: METAR cloud amount (in code, scale=0, ref=0)
-!       HOCB: METAR cloud base height (in meter, scale=-1, ref=-40)
 !    -- qcstr:
 !       *QM: quality marker
 !    -- oestr:
@@ -67,7 +61,7 @@
 !
 !  Observation template:
 !      -- adpupa: 
-!            stn_id stn_lon stn_lat stn_height obs_datetime subset obs_pressure obs_temperature obs_dewpoint obs_u obs_v metar_cloud_amount metar_cloud_base metar_weathertype metar_visibility metar_dewpoint 
+!            stn_id stn_lon stn_lat stn_height obs_datetime subset obs_pressure obs_temperature obs_dewpoint obs_u obs_v
 !
 !  Usage:
 !      gfortran ascii2bufr_conv.f90 -lbufr -L/home/jzanetti/programs/comGSIv3.5_EnKFv1.1/lib -ffree-line-length-none -o ascii2bufr_conv.exe
@@ -78,28 +72,17 @@ program ascii2bufr_conv
  implicit none
  integer :: n
  integer, parameter :: mxmn=35, mxlv=200
- ! observation station information
  character(80):: hdstr='SID XOB YOB DHR TYP ELV SAID T29'
- ! normal observation
  character(80):: obstr='POB ZOB TOB TDO UOB VOB PWO CAT PRSS'
- ! metar cloud observation
- character(80):: metarcldstr='CLAM HOCB'
- character(80):: metarwthstr='PRWE'
- character(80):: metarvisstr='HOVI TDO'
- ! quality marker
  character(80):: qcstr='PQM QQM TQM ZQM WQM NUL PWQ'
- ! observation error
  character(80):: oestr='POE QOE TOE NUL WOE NUL PWE'
-
  real(8) :: hdr(mxmn),obs(mxmn,mxlv),qcf(mxmn,mxlv),oer(mxmn,mxlv)
- real(8) :: cldstr(2,10), wthstr(1,10), visstr(2,1)
 
  character(8) subset
  integer :: unit_out=10,unit_table=20
  integer :: iret, nlvl, idate
  integer :: datetime, obs_type
  real :: station_lon, station_lat, station_ele, obs_pressure, obs_temperature, obs_dewpoint, obs_u, obs_v
- real :: metar_cloud_amount, metar_cloud_base, metar_weathertype, metar_visibility, metar_dewpoint
  character(8) :: c_sid
  real(8) :: station_id
  character(80) :: file_in, file_out
@@ -125,7 +108,6 @@ program ascii2bufr_conv
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  hdr=10.0e10
  obs=10.0e10; qcf=10.0e10; oer=10.0e10
- cldstr=10.0e10; wthstr=10.0e10; visstr=10.0e10
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Start the file: open bufr file and messagee
@@ -139,8 +121,7 @@ program ascii2bufr_conv
  open (unit = 7, file = file_in)
  do while(.true.)
     read (7,*, end=15) c_sid, station_lon, station_lat, station_ele, datetime, subset, &
-                       obs_pressure, obs_temperature, obs_dewpoint, obs_u, obs_v, &
-                       metar_cloud_amount, metar_cloud_base, metar_weathertype, metar_visibility, metar_dewpoint
+                       obs_pressure, obs_temperature, obs_dewpoint, obs_u, obs_v
     idate=datetime
     call openmb(unit_out,subset,idate)
     hdr(1)=station_id
@@ -211,47 +192,6 @@ program ascii2bufr_conv
     call ufbint(unit_out,obs,mxmn,nlvl,iret,obstr)
     call ufbint(unit_out,oer,mxmn,nlvl,iret,oestr)
     call ufbint(unit_out,qcf,mxmn,nlvl,iret,qcstr)
-    call writsb(unit_out)
-
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! For cloud observation
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if (subset=='ADPSFC') then
-        hdr(5)=181
-        obs(8,1)=0.0
-    endif
-
-    if (metar_cloud_amount .ne. -88888) then
-        ! obtain cloud amount
-        cldstr(1,1)=metar_cloud_amount;
-    endif  
-
-    if (metar_cloud_base .ne. -88888) then
-        ! obtain cloud base height
-        cldstr(2,1)=metar_cloud_base;
-    endif      
-    
-    if (metar_weathertype .ne. -88888) then
-        ! obtain metar weather type
-        wthstr(1,1)=metar_weathertype;
-    endif 
-
-    if (metar_visibility .ne. -88888) then
-        ! obtain metar weather type
-        visstr(1,1)=metar_visibility;
-    endif 
-
-    if (metar_dewpoint .ne. -88888) then
-        ! obtain metar dew point
-        visstr(2,1)=metar_dewpoint;
-    endif 
-
-    ! encode dataset
-    call ufbint(unit_out,hdr,mxmn,1,iret,hdstr)
-    call ufbint(unit_out,cldstr,2,10,iret,metarcldstr)
-    call ufbint(unit_out,wthstr,1,10,iret,metarwthstr)
-    call ufbint(unit_out,visstr,2,1,iret,metarvisstr)
     call writsb(unit_out)
     call closmg(unit_out)
 

@@ -9,20 +9,21 @@ gsi_vertical_levels = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.5
                        5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10, 11, 12, 13, 14, 15, 16, 18]
 
 def mock_ref(radar_north=-39.0, radar_south=-40.0, radar_west=173.5, radar_east=174.0, radar_bottom=0.5, radar_top=20.0,
-             ref_north=-39.5, ref_south=-39.75, ref_west=173.6, ref_east=173.75, ref_bottom=0.02, ref_top=15.0):
+             ref_north=None, ref_south=None, ref_west=None, ref_east=None, ref_bottom=None, ref_top=None):
     radar_coverage_lat = numpy.arange(radar_south, radar_north, 0.01)
     radar_coverage_lon = numpy.arange(radar_west, radar_east, 0.01)
     radar_coverage_height = numpy.arange(radar_bottom, radar_top, 0.25)
     
-    mock_ref_value = 62.5
+    mock_ref_value = 23.5
     radar_map = numpy.zeros((len(radar_coverage_lat),len(radar_coverage_lon),len(radar_coverage_height)))
     for ilat, lat in enumerate(radar_coverage_lat):
         for ilon, lon in enumerate(radar_coverage_lon):
             for iheight, height in enumerate(radar_coverage_height):
-                if (lat > ref_south and lat < ref_north) and ((lon > ref_west) and (lon < ref_east)) and ((height > ref_bottom and height < ref_top)):
-                    radar_map[ilat, ilon, iheight] = mock_ref_value
-                else:
-                    radar_map[ilat, ilon, iheight] = 0.0
+                if ref_north != None:
+                    if (lat > ref_south and lat < ref_north) and ((lon > ref_west) and (lon < ref_east)) and ((height > ref_bottom and height < ref_top)):
+                        radar_map[ilat, ilon, iheight] = mock_ref_value
+                    else:
+                        radar_map[ilat, ilon, iheight] = 0.0
     
     return radar_map, radar_coverage_lat, radar_coverage_lon, radar_coverage_height
 
@@ -43,7 +44,7 @@ def radar2model_grid(radar_map, radar_lat, radar_lon, radar_height,
                     vi = -999.0
                 
                 radar_at_model_space[i,j,k] = vi
-    
+                
     return radar_at_model_space
 
 def interp3(x, y, z, v, xi, yi, zi, **kwargs):
@@ -102,15 +103,17 @@ def write_radar_nc(lats, lons, vertical_levels, radar):
     latitudes[:] = lats
     longitudes[:] = lons
     reflectivity[:,:,:] = radar
-    
     rootgrp.close()
 
 if __name__ == '__main__':
     background_data = '/home/jzanetti/wrf_directory/wrf_exp_20170710/wrf/wrfinput_d01'
     model_lats, model_lons = read_model_background(background_data)
+    #radar_map, radar_lat, radar_lon, radar_height = \
+    #        mock_ref(radar_north=-39.0, radar_south=-40.0, radar_west=173.5, radar_east=174.0, radar_bottom=0.5, radar_top=20.0,
+    #                 ref_north=-39.5, ref_south=-39.75, ref_west=173.6, ref_east=173.75, ref_bottom=0.02, ref_top=15.0)
     radar_map, radar_lat, radar_lon, radar_height = \
             mock_ref(radar_north=-39.0, radar_south=-40.0, radar_west=173.5, radar_east=174.0, radar_bottom=0.5, radar_top=20.0,
-                     ref_north=-39.5, ref_south=-39.75, ref_west=173.6, ref_east=173.75, ref_bottom=0.02, ref_top=15.0)
+                     ref_north=-39.5, ref_south=-39.6, ref_west=173.6, ref_east=173.65, ref_bottom=0.75, ref_top=1.5)
     radar_map = radar2model_grid(radar_map, radar_lat, radar_lon, radar_height,
                      model_lats, model_lons, gsi_vertical_levels)
     write_radar_nc(model_lats, model_lons, gsi_vertical_levels, radar_map)

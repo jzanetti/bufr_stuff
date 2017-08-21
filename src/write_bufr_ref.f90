@@ -23,7 +23,7 @@
     implicit none
 
     REAL(r_kind) :: ref3d_column(maxlvl+2,nlon*nlat)   ! 3D reflectivity in column
-    real(r_kind) :: hdr(5),obs(1,35)
+    real(r_kind) :: hdr(5),obs(1,maxlvl)
     character(80):: hdrstr='SID XOB YOB DHR TYP'
     character(80):: obsstr='HREF'
 
@@ -51,8 +51,9 @@
 !
     DO i=1,numref
     DO k=1,maxlvl
-      !write(*,*) ref3d_column(12,i)
-      if(ref3d_column(k+2,i) < -63.0 .and. ref3d_column(k+2,i) > -100.0 ) then
+      !write(*,*) ref3d_column(k+2,i)
+      !if(ref3d_column(k+2,i) < -63.0 .and. ref3d_column(k+2,i) > -100.0 ) then
+      if(ref3d_column(k+2,i) == 0.0) then
         ref3d_column(k+2,i)=-63.0_r_kind
       elseif(ref3d_column(k+2,i) < -100.0) then
         ref3d_column(k+2,i)=-64.0_r_kind
@@ -73,7 +74,7 @@
       hdr(5)=500
 
       do k=1,maxlvl
-        obs(1,k)=ref3d_column(2+k,n)
+        obs(1,k)=ref3d_column(2+k,n)/1.0_r_kind
       enddo
       call openmb(lendian_in,subset,idate)
       call ufbint(lendian_in,hdr,5,   1,iret,hdrstr)
