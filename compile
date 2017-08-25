@@ -4,7 +4,7 @@ echo " "
 echo "**** Compiling bufr stuff ****"
 echo " "
 
-( mkdir bin ; cd src ; make -i -r all )
+( mkdir -p bin ; cd src ; make -i -r all )
 if ( -e src/ascii2bufr_conv.exe ) then
     ln -sf ../src/ascii2bufr_conv.exe bin/ascii2bufr_conv.exe
 endif

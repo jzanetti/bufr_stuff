@@ -1,4 +1,6 @@
 #!/bin/csh -f
 
-(/bin/rm -rf bin *.bufr)
-(cd src ; /bin/rm -f *.o *.exe)
+echo 'clean the installation'
+
+(/bin/rm -rf $PWD/bin)
+(cd $PWD/src ; /bin/rm -f *.o *.exe)
