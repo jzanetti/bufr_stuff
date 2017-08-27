@@ -11,17 +11,30 @@ build:
 
 requirements:
   build:
-        - intelpython
-        - jpeg 8d
-        - libpng
-        - libssh2
-        - curl
-        - icc_rt ==16.0.3 intel_5
-        - impi_rt ==2017.0.1 intel_1
-        - hdf5 ==1.8.19 intel_test
-        - netcdf-fortran 4.4.4 intel_test
-        - netcdf 4.4.1.1 intel_test
-        - gsi ==3.5 intel_test
+    - obs2aws ==0.0.6
+    - ampsaws
+    - awscli
+    - fr_alerter
+    - fr_logging
+    - geohash
+    - mysql-python
+    - numpy
+    - pint
+    - psutil
+    - hdf4
+    - pycast
+    - python
+    - simplejson
+    - intelpython
+    - jpeg 8d
+    - libpng
+    - libssh2
+    - curl
+    - icc_rt ==16.0.3 intel_5
+    - impi_rt ==2017.0.1 intel_1
+    - netcdf-fortran 4.4.4 intel_test
+    - netcdf 4.4.1.1 intel_test
+    - gsi ==3.5 intel_test
   run:
 
 about:

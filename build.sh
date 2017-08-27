@@ -1,3 +1,9 @@
+
+# compile python codes
+python setup.py install
+
+
+# compile fortran codes
 export INSTALL_DIR=$CONDA_PREFIX/bufr_stuff
 
 export INTEL=/home/szhang/Programs/intel
